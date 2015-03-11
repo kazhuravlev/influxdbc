@@ -2,6 +2,7 @@ package influxdbc
 
 import (
 	"fmt"
+	"time"
 	"net/http"
 )
 
@@ -25,4 +26,17 @@ func (db *InfluxDB) DeleteDatabase(database string) error {
 	result, _ := http.DefaultClient.Do(req)
 	defer result.Body.Close()
 	return nil
+}
+
+func (db *InfluxDB) Ping() (time.Duration, string, error) {
+	now := time.Now()
+	url := fmt.Sprintf("http://%s/ping?u=%s&p=%s", db.host, db.username, db.password)
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return 0, "", err
+	}
+	resp, _ := http.DefaultClient.Do(req)
+	defer resp.Body.Close()
+	return time.Since(now), resp.Header.Get("X-Influxdb-Version"), nil
 }
