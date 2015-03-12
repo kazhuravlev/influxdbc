@@ -36,7 +36,10 @@ func (db *InfluxDB) Ping() (time.Duration, string, error) {
 	if err != nil {
 		return 0, "", err
 	}
-	resp, _ := http.DefaultClient.Do(req)
+	resp, err_do := http.DefaultClient.Do(req)
+	if err_do != nil {
+		return time.Since(now), "", err_do
+	}
 	defer resp.Body.Close()
 	return time.Since(now), resp.Header.Get("X-Influxdb-Version"), nil
 }
